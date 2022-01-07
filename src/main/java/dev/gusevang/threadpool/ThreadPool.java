@@ -20,6 +20,14 @@ public class ThreadPool {
         }
     }
 
+    public void Join(){
+        try{
+            for(var thread : threads){
+                thread.join();
+            }
+        }catch(InterruptedException e){}
+    }
+
     public void execute(Runnable task) {
         synchronized (queue) {
             queue.add(task);
@@ -31,7 +39,7 @@ public class ThreadPool {
         public void run() {
             Runnable task;
 
-            while (isRunning) {
+            while (true) {
                 synchronized (queue) {
                     while (queue.isEmpty()) {
                         try {
@@ -43,8 +51,6 @@ public class ThreadPool {
                     task = (Runnable) queue.poll();
                 }
 
-                // If we don't catch RuntimeException,
-                // the pool could leak threads
                 try {
                     task.run();
                 } catch (RuntimeException e) {
