@@ -77,34 +77,4 @@ public class Computation<T> {
         Tree<T> tree = new Tree<>(task);
         return tree;
     };
-
-    /*public static class Map{
-        public Map(dev.gusevang.tree.Map type, Tree tree, Computation t){
-
-
-        }
-        public Map(dev.gusevang.tree.Map type, List<List<Double>> data){
-
-
-        }
-    }
-
-    public class Zip{
-        public Zip(Tree tree1, Tree tree2){
-
-        }
-    }
-
-    public class Reduce{
-        public Reduce(dev.gusevang.tree.Reduce type, Tree tree){
-
-        }
-        public Reduce(dev.gusevang.tree.Reduce type, List<Double> data){
-
-        }
-    }
-
-    public class Product{
-
-    }*/
 }
