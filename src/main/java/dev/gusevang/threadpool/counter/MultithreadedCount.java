@@ -11,7 +11,7 @@ public class MultithreadedCount {
             Counter task = new Counter(i);
             pool.execute(task);
         }
-        pool.Join();
 
+        pool.Join();
     }
 }

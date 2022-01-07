@@ -23,6 +23,9 @@ public class ThreadPool {
     public void Join(){
         try{
             for(var thread : threads){
+                isRunning = false;
+            }
+            for(var thread : threads){
                 thread.join();
             }
         }catch(InterruptedException e){}
@@ -41,16 +44,29 @@ public class ThreadPool {
 
             while (true) {
                 synchronized (queue) {
-                    while (queue.isEmpty()) {
+                    /*while (queue.isEmpty()) {
                         try {
                             queue.wait();
                         } catch (InterruptedException e) {
                             System.out.println("An error occurred while queue is waiting: " + e.getMessage());
                         }
+                        if(!isRunning){
+                            break;
+                        }
+                    }
+                    if(!isRunning){
+                        break;
+                    }*/
+                    try {
+                        queue.wait();
+                    } catch (InterruptedException e) {
+                        System.out.println("An error occurred while queue is waiting: " + e.getMessage());
+                    }
+                    if(queue.isEmpty()){
+                        break;
                     }
                     task = (Runnable) queue.poll();
                 }
-
                 try {
                     task.run();
                 } catch (RuntimeException e) {
@@ -60,7 +76,7 @@ public class ThreadPool {
         }
     }
 
-    public void shutdown() {
+   public void shutdown() {
         isRunning = false;
     }
 }
