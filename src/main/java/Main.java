@@ -35,8 +35,8 @@ public class Main {
         result.ForEach(Console.WriteLine);*/
         Integer integer=3;
         Double d = integer.doubleValue();
-        List<Double> arr1 = Arrays.asList(1.,2.,3.);
-        List<Double> arr2 = Arrays.asList(1.,2.,3.);
+        List<List<Double>> arr1 = Arrays.asList(Arrays.asList(1.),Arrays.asList(2.),Arrays.asList(3.));
+        List<List<Double>> arr2 = Arrays.asList(Arrays.asList(1.),Arrays.asList(2.),Arrays.asList(3.));
         List<Double> arr3 = Arrays.asList(3.,1.,4.);
         List<List<Double>> arr = Arrays.asList(Arrays.asList(1.,3.),Arrays.asList(2.,3.), Arrays.asList(3.,3.));
         DataNode<Double> data1 = new DataNode<Double>(arr);
@@ -55,9 +55,15 @@ public class Main {
         }
         Tree newTree1 = Computation.map(Map.multiply,arr);
         res = newTree1.calculatingResult();
-        for(var i : res){
-            System.out.println(i);
-        }
+        System.out.println(res);
+        Tree newTree2 = Computation.zip(Zip.concat,arr1,arr2);
+        res = newTree2.calculatingResult();
+        System.out.println(res);
+
+        Tree newTree3 = Computation.product(Product.product,arr1,arr2);
+        res = newTree3.calculatingResult();
+        System.out.println(res);
+
         //Computation.Map t = new Computation.Map(Map.add, arr);
         //Computation.Map t1 = new Computation.Map(Map.add, tree, new Computation(t));
 

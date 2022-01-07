@@ -110,12 +110,34 @@ public class TaskNode <T, T1> extends Node<T1> {
             }
         }
         else if(method.equals(Zip.concat)){
-            int len = Math.min(val1.size(),val2.size());
-            List<List<T1>> res = new ArrayList<>();
-
+            int len = Math.min(vall1.size(),vall2.size());
+            System.out.println("Length is " + vall1.size()+ " and " + vall2.size());
+            for(int i=0;i<len;++i){
+                result.add(new ArrayList<>());
+                for(var val : vall1.get(i)){
+                    result.get(i).add(val);
+                }
+                for(var val : vall2.get(i)){
+                    result.get(i).add(val);
+                }
+            }
         }
         else if(method.equals(Product.product)){
-
+            int len1 = vall1.size();
+            int len2= vall2.size();
+            int k=0;
+            for(int i=0;i<len1;++i){
+                for(int j=0;j<len2;++j){
+                    result.add(new ArrayList<>());
+                    for(var val : vall1.get(i)){
+                        result.get(k).add(val);
+                    }
+                    for(var val : vall2.get(j)){
+                        result.get(k).add(val);
+                    }
+                    ++k;
+                }
+            }
         }
         return (List<List<T1>>)(Object)result;
     }
