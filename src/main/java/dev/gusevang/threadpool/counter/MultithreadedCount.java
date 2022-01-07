@@ -12,6 +12,6 @@ public class MultithreadedCount {
             pool.execute(task);
         }
 
-        pool.Join();
+        pool.shutdown();
     }
 }

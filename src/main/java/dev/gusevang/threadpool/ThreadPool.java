@@ -1,13 +1,16 @@
 package dev.gusevang.threadpool;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Executor;
 
-public class ThreadPool {
-    private final int nThreads;
+public class ThreadPool implements Executor {
+    /*private final int nThreads;
     private final PoolWorker[] threads;
     private final LinkedBlockingQueue queue;
-    private volatile boolean isRunning = true;
+    private CountDownLatch doneSignal  = new CountDownLatch(1);
 
     public ThreadPool(int nThreads) {
         this.nThreads = nThreads;
@@ -23,9 +26,6 @@ public class ThreadPool {
     public void Join(){
         try{
             for(var thread : threads){
-                isRunning = false;
-            }
-            for(var thread : threads){
                 thread.join();
             }
         }catch(InterruptedException e){}
@@ -34,7 +34,9 @@ public class ThreadPool {
     public void execute(Runnable task) {
         synchronized (queue) {
             queue.add(task);
-            queue.notify();
+            doneSignal.countDown();
+            //queue.notify();
+            //doneSignal = new CountDownLatch(1);
         }
     }
 
@@ -44,27 +46,10 @@ public class ThreadPool {
 
             while (true) {
                 synchronized (queue) {
-                    /*while (queue.isEmpty()) {
-                        try {
-                            queue.wait();
-                        } catch (InterruptedException e) {
-                            System.out.println("An error occurred while queue is waiting: " + e.getMessage());
-                        }
-                        if(!isRunning){
-                            break;
-                        }
-                    }
-                    if(!isRunning){
-                        break;
-                    }*/
-                    try {
-                        queue.wait();
-                    } catch (InterruptedException e) {
-                        System.out.println("An error occurred while queue is waiting: " + e.getMessage());
-                    }
-                    if(queue.isEmpty()){
-                        break;
-                    }
+
+                    try{
+                        doneSignal.await();
+                    }catch (java.lang.InterruptedException e){}
                     task = (Runnable) queue.poll();
                 }
                 try {
@@ -74,9 +59,38 @@ public class ThreadPool {
                 }
             }
         }
+    }*/
+
+    private final Queue<Runnable> workQueue = new ConcurrentLinkedQueue<>();
+    private volatile boolean isRunning = true;
+
+    public ThreadPool(int nThreads) {
+        for (int i = 0; i < nThreads; i++) {
+            new Thread(new TaskWorker()).start();
+        }
     }
 
-   public void shutdown() {
+    @Override
+    public void execute(Runnable command) {
+        if (isRunning) {
+            workQueue.offer(command);
+        }
+    }
+
+    public void shutdown() {
         isRunning = false;
+    }
+
+    private final class TaskWorker implements Runnable {
+
+        @Override
+        public void run() {
+            while (isRunning) {
+                Runnable nextTask = workQueue.poll();
+                if (nextTask != null) {
+                    nextTask.run();
+                }
+            }
+        }
     }
 }
