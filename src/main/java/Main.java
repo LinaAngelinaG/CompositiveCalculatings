@@ -1,11 +1,13 @@
-import dev.gusevang.tree.DataNode;
-import dev.gusevang.tree.Map;
-import dev.gusevang.tree.Method;
+import dev.gusevang.tree.*;
+import dev.gusevang.computation.Computation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+        /*
         ArrayList<ArrayList<Integer>> arr1 = new ArrayList<ArrayList<Integer>>();
         arr1.get(0).add(1);
         arr1.get(1).add(3);
@@ -30,6 +32,35 @@ public class Main {
 
         TreeOfAlgrorithm<int> tree = new TreeOfAlgrorithm<int>(node2);
         List<int> result = tree.calculatingResult();
-        result.ForEach(Console.WriteLine);
+        result.ForEach(Console.WriteLine);*/
+        Integer integer=3;
+        Double d = integer.doubleValue();
+        List<Double> arr1 = Arrays.asList(1.,2.,3.);
+        List<Double> arr2 = Arrays.asList(1.,2.,3.);
+        List<Double> arr3 = Arrays.asList(3.,1.,4.);
+        List<List<Double>> arr = Arrays.asList(Arrays.asList(1.,3.),Arrays.asList(2.,3.), Arrays.asList(3.,3.));
+        DataNode<Double> data1 = new DataNode<Double>(arr);
+        DataNode<Double> data2 = new DataNode<Double>(Arrays.asList(arr3));
+        //TaskNode<Map,Double> node1 = new TaskNode<Map, Double>(Map.multiply, data1);
+        TaskNode<Reduce,Double> node1 = new TaskNode<>(Reduce.max, data2);
+        Tree tree = new Tree(node1);
+        List<List<Double>> res = tree.calculatingResult();
+        for(var i : res){
+            System.out.println(i);
+        }
+        Tree newTree = Computation.reduce(Reduce.max,Arrays.asList(arr3));
+        res = newTree.calculatingResult();
+        for(var i : res){
+            System.out.println(i);
+        }
+        Tree newTree1 = Computation.map(Map.multiply,arr);
+        res = newTree1.calculatingResult();
+        for(var i : res){
+            System.out.println(i);
+        }
+        //Computation.Map t = new Computation.Map(Map.add, arr);
+        //Computation.Map t1 = new Computation.Map(Map.add, tree, new Computation(t));
+
     }
+
 }

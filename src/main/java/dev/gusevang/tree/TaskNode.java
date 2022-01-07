@@ -1,12 +1,18 @@
 package dev.gusevang.tree;
 
+import com.sun.jdi.DoubleValue;
+
 import java.awt.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TaskNode <T, T1> extends Node<T1> {
     private T method;    //divide, add, ... etc.
-    public TaskNode(T typeOfMethod, Node<T1> nodeleft, Node<T1> noderight) { //for zip(reduce) operations
+
+    public TaskNode(T typeOfMethod, Node<T1> nodeleft, Node<T1> noderight) { //for zip/(reduce) operations
         method = typeOfMethod;
         right = noderight;
         left = nodeleft;
@@ -16,39 +22,42 @@ public class TaskNode <T, T1> extends Node<T1> {
         right = left = node;
     }
     @Override
-    protected ArrayList<ArrayList<T1>> calculate(ArrayList<ArrayList<T1>> val1, ArrayList<ArrayList<T1>> val2) {
-        ArrayList<ArrayList<Double>> result = new ArrayList<ArrayList<Double>>();
+    protected List<List<T1>> calculate(List<List<T1>> val1, List<List<T1>> val2) {
         if(val1 == null || val2 ==null || val1.isEmpty() || val2.isEmpty()){
            return null;
         }
         if(!(val1.get(0).get(0) instanceof Integer || val1.get(0).get(0) instanceof Double || val1.get(0).get(0) instanceof Float)){
             return null;
         }
-        ArrayList<ArrayList<Double>> vall1 = (ArrayList<ArrayList<Double>>)(Object)val1;
-        ArrayList<ArrayList<Double>> vall2 = (ArrayList<ArrayList<Double>>)(Object)val2;
-        int y = 0;
+        int y = Math.min(val1.size(), val2.size());
+        List<List<Double>> result = new ArrayList<List<Double>>(y);
+        //клиент-сервис система
+
+        /*List<List<Double>> matrix = val1.stream()
+                .map(line -> line.stream().map(x -> x.doubleValue()).collect(Collectors.toList()))
+                .collect(Collectors.toList());*/
+        List<List<Double>> vall1 = (List<List<Double>>)(Object)val1;
+        //System.out.println(vall1);
+        List<List<Double>> vall2 = (List<List<Double>>)(Object)val2;
+        y = 0;
         if(method.equals(Map.divide)){
             for(var i : vall1) {
-                result.get(y).add(i.get(0)/i.get(1));
-                ++y;
+                result.add(Arrays.asList((double)i.get(0)/i.get(1)));
             }
         }
         else if(method.equals(Map.add)){
             for(var i : vall1) {
-                result.get(y).add(i.get(0)+i.get(1));
-                ++y;
+                result.add(Arrays.asList((double)i.get(0)+i.get(1)));
             }
         }
         else if(method.equals(Map.multiply)){
-            for(var i : vall1) {
-                result.get(y).add(i.get(0)*i.get(1));
-                ++y;
+            for(List<Double> i : vall1) {
+                result.add(Arrays.asList(i.get(0).doubleValue()*i.get(1).doubleValue()));
             }
         }
         else if(method.equals(Map.exponentiate)){
             for(var i : vall1) {
-                result.get(y).add(Math.pow(i.get(0),i.get(1)));
-                ++y;
+                result.add(Arrays.asList(Math.pow(i.get(0),i.get(1))));
             }
         }
         else if(method.equals(Reduce.max)){
@@ -61,14 +70,12 @@ public class TaskNode <T, T1> extends Node<T1> {
                         counter = 1;
                     }
                 }
-                result.get(y).add(max);
-                ++y;
+                result.add(Arrays.asList(max));
             }
         }
         else if(method.equals(Reduce.length)){
             for(var val : vall1){
-                result.get(y).add((double)val.size());
-                ++y;
+                result.add(Arrays.asList((double)val.size()));
             }
         }
         else if(method.equals(Reduce.min)){
@@ -81,8 +88,7 @@ public class TaskNode <T, T1> extends Node<T1> {
                         counter = 1;
                     }
                 }
-                result.get(y).add(min);
-                ++y;
+                result.add(Arrays.asList(min));
             }
         }
         else if(method.equals(Reduce.overage)){
@@ -91,8 +97,7 @@ public class TaskNode <T, T1> extends Node<T1> {
                 for(var i : val) {
                     aver += i;
                 }
-                result.get(y).add(aver/val.size());
-                ++y;
+                result.add(Arrays.asList(aver/val.size()));
             }
         }
         else if(method.equals(Reduce.sum)){
@@ -101,10 +106,17 @@ public class TaskNode <T, T1> extends Node<T1> {
                 for(var i : val) {
                     sum += i;
                 }
-                result.get(y).add(sum);
-                ++y;
+                result.add(Arrays.asList(sum));
             }
         }
-        return (ArrayList<ArrayList<T1>>)(Object)result;
+        else if(method.equals(Zip.concat)){
+            int len = Math.min(val1.size(),val2.size());
+            List<List<T1>> res = new ArrayList<>();
+
+        }
+        else if(method.equals(Product.product)){
+
+        }
+        return (List<List<T1>>)(Object)result;
     }
 }

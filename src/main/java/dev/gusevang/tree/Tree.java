@@ -1,6 +1,7 @@
 package dev.gusevang.tree;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Tree<T> {
     // T - type of data in DataNode
@@ -10,8 +11,13 @@ public class Tree<T> {
     {
         this.head = head;
     }
-    public ArrayList<ArrayList<T>> calculatingResult()
+    public List<List<T>> calculatingResult()
     {
         return head.makeCalculation();
+    }
+    public void toHead(Node<T> newHead){  head = (newHead != null ? newHead : head);}
+
+    public Node<T> getHead() {
+        return head;
     }
 }

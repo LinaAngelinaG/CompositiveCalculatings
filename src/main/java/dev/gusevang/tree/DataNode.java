@@ -1,15 +1,16 @@
 package dev.gusevang.tree;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DataNode<T> extends Node<T>{
-    private ArrayList<ArrayList<T>> data;
+    private List<List<T>> data;
 
-    public DataNode(ArrayList<ArrayList<T>> data) {
+    public DataNode(List<List<T>> data) {
         this.data = data;
     }
     @Override
-    protected ArrayList<ArrayList<T>> calculate(ArrayList<ArrayList<T>> val1, ArrayList<ArrayList<T>> val2) {
+    protected List<List<T>> calculate(List<List<T>> val1, List<List<T>> val2) {
         return data;
     }
 }

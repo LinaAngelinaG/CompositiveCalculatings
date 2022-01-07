@@ -6,3 +6,4 @@ public enum Method {
     zip,
     unzip
 }
+

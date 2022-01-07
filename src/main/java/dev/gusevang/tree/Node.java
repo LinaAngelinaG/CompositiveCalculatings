@@ -1,16 +1,17 @@
 package dev.gusevang.tree;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Node<T> {
     protected Node<T> left = null;
     protected Node<T> right = null;
 
-    protected abstract ArrayList<ArrayList<T>> calculate(ArrayList<ArrayList<T>> t1, ArrayList<ArrayList<T>> t2);
+    protected abstract List<List<T>> calculate(List<List<T>> t1, List<List<T>> t2);
 
-    public ArrayList<ArrayList<T>> makeCalculation() {
-        ArrayList<ArrayList<T>> leftResult = new ArrayList<ArrayList<T>>();
-        ArrayList<ArrayList<T>> rightResult = new ArrayList<ArrayList<T>>();
+    public List<List<T>> makeCalculation() {
+        List<List<T>> leftResult = new ArrayList<List<T>>();
+        List<List<T>> rightResult = new ArrayList<List<T>>();
 
         if (left != null) {
             leftResult = left.makeCalculation();
