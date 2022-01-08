@@ -19,7 +19,8 @@ public class Benchmarking {
 
     @State(Scope.Benchmark)
     public static class MyBenchmarkState1 {
-        @Param({"5", "10", "20", "50", "100", "500"})
+        //@Param({"5", "10", "20", "50", "100", "500"})
+        @Param({"1000", "1500"})
         public int value;
 
         Random rnd = new Random();
@@ -48,7 +49,7 @@ public class Benchmarking {
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
     @BenchmarkMode(Mode.AverageTime)
     public void benchmarkSimple(MyBenchmarkState1 state) {
-        state.tree.calculatingResultThreaded();
+        state.tree.calculatingResult();
     }
 
     /*

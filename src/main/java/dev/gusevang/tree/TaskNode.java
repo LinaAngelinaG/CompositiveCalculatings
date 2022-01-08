@@ -183,17 +183,17 @@ public class TaskNode<T, T1> extends Node<T1> {
             }catch(java.lang.InterruptedException e){}
             thread.shutdown();
         } else if (method.equals(Map.multiply)) {
-            ThreadPool thread = new ThreadPool(4);
-            CountDownLatch cde = new CountDownLatch(vall1.size());
+            ThreadPool thread = new ThreadPool(8);
+            //CountDownLatch cde = new CountDownLatch(vall1.size());
             for (var i : vall1) {
                 thread.execute(() -> {
                     result.add(new CopyOnWriteArrayList<>(new Double[] {(double) i.get(0) * i.get(1)}));
-                    cde.countDown();
+                    //cde.countDown();
                 });
             }
-            try{
+            /*try{
                 cde.await();
-            }catch(java.lang.InterruptedException e){}
+            }catch(java.lang.InterruptedException e){}*/
             thread.shutdown();
         } else if (method.equals(Map.exponentiate)) {
             ThreadPool thread = new ThreadPool(4);

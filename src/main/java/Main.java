@@ -93,6 +93,7 @@ public class Main {
                                         Computation.product(Product.product,
                                                 list1, list2)))));
         System.out.println(tree.calculatingResultThreaded());
+        System.out.println(tree.calculatingResult());
         //Computation.Map t = new Computation.Map(Map.add, arr);
         //Computation.Map t1 = new Computation.Map(Map.add, tree, new Computation(t));
 
