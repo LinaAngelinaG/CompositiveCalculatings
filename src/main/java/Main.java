@@ -4,6 +4,7 @@ import dev.gusevang.computation.Computation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Main {
     public static void main(String[] args) {
@@ -35,7 +36,21 @@ public class Main {
         result.ForEach(Console.WriteLine);*/
         Integer integer=3;
         Double d = integer.doubleValue();
-        List<List<Double>> arr1 = Arrays.asList(Arrays.asList(1.),Arrays.asList(2.),Arrays.asList(3.));
+        CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> arr3 = new CopyOnWriteArrayList<>();
+        arr3.add(new CopyOnWriteArrayList<>(new Double[] {1.,4.,3.}));
+
+        CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> arr1 = new CopyOnWriteArrayList<>();
+        arr1.add(new CopyOnWriteArrayList<>(new Double[] {1.}));
+        arr1.add(new CopyOnWriteArrayList<>(new Double[] {2.}));
+        arr1.add(new CopyOnWriteArrayList<>(new Double[] {3.}));
+
+        CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> arr = new CopyOnWriteArrayList<>();
+        arr.add(new CopyOnWriteArrayList<>(new Double[] {1.,3.}));
+        arr.add(new CopyOnWriteArrayList<>(new Double[] {2.,3.}));
+        arr.add(new CopyOnWriteArrayList<>(new Double[] {3.,3.}));
+
+        /*
+        CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> arr1 = Arrays.asList(Arrays.asList(1.),Arrays.asList(2.),Arrays.asList(3.));
         List<List<Double>> arr2 = Arrays.asList(Arrays.asList(1.),Arrays.asList(2.),Arrays.asList(3.));
         List<Double> arr3 = Arrays.asList(3.,1.,4.);
         List<List<Double>> arr = Arrays.asList(Arrays.asList(1.,3.),Arrays.asList(2.,3.), Arrays.asList(3.,3.));
@@ -44,11 +59,12 @@ public class Main {
         //TaskNode<Map,Double> node1 = new TaskNode<Map, Double>(Map.multiply, data1);
         TaskNode<Reduce,Double> node1 = new TaskNode<>(Reduce.max, data2);
         Tree tree = new Tree(node1);
-        List<List<Double>> res = tree.calculatingResult();
         for(var i : res){
             System.out.println(i);
-        }
-        Tree newTree = Computation.reduce(Reduce.max,Arrays.asList(arr3));
+        }*/
+        CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> res;
+
+        Tree newTree = Computation.reduce(Reduce.max,arr3);
         res = newTree.calculatingResult();
         for(var i : res){
             System.out.println(i);
@@ -56,14 +72,27 @@ public class Main {
         Tree newTree1 = Computation.map(Map.multiply,arr);
         res = newTree1.calculatingResult();
         System.out.println(res);
-        Tree newTree2 = Computation.zip(Zip.concat,arr1,arr2);
+        Tree newTree2 = Computation.zip(Zip.concat,arr1,arr1);
         res = newTree2.calculatingResult();
         System.out.println(res);
 
-        Tree newTree3 = Computation.product(Product.product,arr1,arr2);
+        Tree newTree3 = Computation.product(Product.product,arr1,arr1);
         res = newTree3.calculatingResult();
         System.out.println(res);
 
+        CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> list1 = new CopyOnWriteArrayList<>();
+        for (var i = 0; i < 10; i++) {
+            list1.add(new CopyOnWriteArrayList<>(new Double[] {Math.random() * 100}));
+        }
+        CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> list2 = new CopyOnWriteArrayList<>();
+        list2.add(new CopyOnWriteArrayList<>(new Double[] {2.}));
+        Tree tree = Computation.reduce(Reduce.sum,
+                Computation.map(Map.multiply,
+                        Computation.product(Product.product, list2,
+                                Computation.map(Map.multiply,
+                                        Computation.product(Product.product,
+                                                list1, list2)))));
+        System.out.println(tree.calculatingResultThreaded());
         //Computation.Map t = new Computation.Map(Map.add, arr);
         //Computation.Map t1 = new Computation.Map(Map.add, tree, new Computation(t));
 

@@ -9,9 +9,23 @@ public class MultithreadedCount {
 
         for (int i = 0; i < 5; i++) {
             Counter task = new Counter(i);
-            pool.execute(task);
+            pool.execute(()->{task.run();});
         }
+
 
         pool.shutdown();
     }
 }
+
+
+/*
+ThreadPool pool = new ThreadPool(7);
+
+        for (int i = 0; i < 5; i++) {
+            Counter task = new Counter(i);
+            CountDownLatch doneSignal  = new CountDownLatch(1);
+            pool.execute(() -> {task.run(); doneSignal.countDown();});
+            try{
+                doneSignal.await();
+            }catch(java.lang.InterruptedException e){}
+ */

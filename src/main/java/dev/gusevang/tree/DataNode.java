@@ -2,15 +2,21 @@ package dev.gusevang.tree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DataNode<T> extends Node<T>{
-    private List<List<T>> data;
+    private CopyOnWriteArrayList<CopyOnWriteArrayList<T>> data;
 
-    public DataNode(List<List<T>> data) {
+    public DataNode(CopyOnWriteArrayList<CopyOnWriteArrayList<T>> data) {
         this.data = data;
     }
     @Override
-    protected List<List<T>> calculate(List<List<T>> val1, List<List<T>> val2) {
+    protected CopyOnWriteArrayList<CopyOnWriteArrayList<T>> calculate(CopyOnWriteArrayList<CopyOnWriteArrayList<T>> val1, CopyOnWriteArrayList<CopyOnWriteArrayList<T>> val2) {
+        return data;
+    }
+
+    @Override
+    protected CopyOnWriteArrayList<CopyOnWriteArrayList<T>> calculateThreaded(CopyOnWriteArrayList<CopyOnWriteArrayList<T>> val1, CopyOnWriteArrayList<CopyOnWriteArrayList<T>> val2) {
         return data;
     }
 }
