@@ -10,10 +10,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class TaskNode<T, T1> extends Node<T1> {
     private T method;    //divide, add, ... etc.
+    private int t;
 
     public TaskNode(T typeOfMethod, Node<T1> nodeleft, Node<T1> noderight) { //for zip/(reduce) operations
         method = typeOfMethod;
@@ -21,9 +23,10 @@ public class TaskNode<T, T1> extends Node<T1> {
         left = nodeleft;
     }
 
-    public TaskNode(T typeOfMethod, Node<T1> node) { //for map operations
+    public TaskNode(T typeOfMethod, Node<T1> node, int threads) { //for map operations
         method = typeOfMethod;
         right = left = node;
+        t = threads;
     }
 
     @Override
@@ -47,19 +50,25 @@ public class TaskNode<T, T1> extends Node<T1> {
         y = 0;
         if (method.equals(Map.divide)) {
             for (var i : vall1) {
-                result.add(new CopyOnWriteArrayList<>(new Double[] {(double) i.get(0) / i.get(1)}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{(double) i.get(0) / i.get(1)}));
             }
         } else if (method.equals(Map.add)) {
             for (var i : vall1) {
-                result.add(new CopyOnWriteArrayList<>(new Double[] {(double) i.get(0) + i.get(1)}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{(double) i.get(0) + i.get(1)}));
             }
         } else if (method.equals(Map.multiply)) {
             for (List<Double> i : vall1) {
-                result.add(new CopyOnWriteArrayList<>(new Double[] {(double) i.get(0) * i.get(1)}));
+                /*try{
+                    Thread.sleep(10);
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }*/
+                result.add(new CopyOnWriteArrayList<>(new Double[]{(double) i.get(0) * i.get(1)}));
             }
         } else if (method.equals(Map.exponentiate)) {
             for (var i : vall1) {
-                result.add(new CopyOnWriteArrayList<>(new Double[] {Math.pow(i.get(0), i.get(1))}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{Math.pow(i.get(0), i.get(1))}));
             }
         } else if (method.equals(Reduce.max)) {
             for (var val : vall1) {
@@ -71,11 +80,11 @@ public class TaskNode<T, T1> extends Node<T1> {
                         counter = 1;
                     }
                 }
-                result.add(new CopyOnWriteArrayList<>(new Double[] {max}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{max}));
             }
         } else if (method.equals(Reduce.length)) {
             for (var val : vall1) {
-                result.add(new CopyOnWriteArrayList<>(new Double[] {(double)val.size()}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{(double) val.size()}));
             }
         } else if (method.equals(Reduce.min)) {
             for (var val : vall1) {
@@ -87,7 +96,7 @@ public class TaskNode<T, T1> extends Node<T1> {
                         counter = 1;
                     }
                 }
-                result.add(new CopyOnWriteArrayList<>(new Double[] {min}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{min}));
             }
         } else if (method.equals(Reduce.overage)) {
             for (var val : vall1) {
@@ -95,7 +104,7 @@ public class TaskNode<T, T1> extends Node<T1> {
                 for (var i : val) {
                     aver += i;
                 }
-                result.add(new CopyOnWriteArrayList<>(new Double[] {aver/val.size()}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{aver / val.size()}));
             }
         } else if (method.equals(Reduce.sum)) {
             for (var val : vall1) {
@@ -103,7 +112,7 @@ public class TaskNode<T, T1> extends Node<T1> {
                 for (var i : val) {
                     sum += i;
                 }
-                result.add(new CopyOnWriteArrayList<>(new Double[] {sum}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{sum}));
             }
         } else if (method.equals(Zip.concat)) {
             int len = Math.min(vall1.size(), vall2.size());
@@ -161,52 +170,73 @@ public class TaskNode<T, T1> extends Node<T1> {
             CountDownLatch cde = new CountDownLatch(vall1.size());
             for (var i : vall1) {
                 thread.execute(() -> {
-                    result.add(new CopyOnWriteArrayList<>(new Double[] {(double) i.get(0) / i.get(1)}));
+                    result.add(new CopyOnWriteArrayList<>(new Double[]{(double) i.get(0) / i.get(1)}));
                     cde.countDown();
                 });
             }
-            try{
+            try {
                 cde.await();
-            }catch(java.lang.InterruptedException e){}
+            } catch (java.lang.InterruptedException e) {
+            }
             thread.shutdown();
         } else if (method.equals(Map.add)) {
             ThreadPool thread = new ThreadPool(4);
             CountDownLatch cde = new CountDownLatch(vall1.size());
             for (var i : vall1) {
                 thread.execute(() -> {
-                    result.add(new CopyOnWriteArrayList<>(new Double[] {(double) i.get(0) + i.get(1)}));
+                    result.add(new CopyOnWriteArrayList<>(new Double[]{(double) i.get(0) + i.get(1)}));
                     cde.countDown();
                 });
             }
-            try{
+            try {
                 cde.await();
-            }catch(java.lang.InterruptedException e){}
+            } catch (java.lang.InterruptedException e) {
+            }
             thread.shutdown();
         } else if (method.equals(Map.multiply)) {
-            ThreadPool thread = new ThreadPool(8);
-            CountDownLatch cde = new CountDownLatch(vall1.size());
+            ThreadPool thread = new ThreadPool(t);
+            //var thread = Executors.newCachedThreadPool();
+            CountDownLatch cde = new CountDownLatch(vall1.size() % 100 == 0 ? vall1.size() / 100 : vall1.size() / 100 + 1);
+            for (int i = 0; i < vall1.size(); i += 100) {
+                final int k = i;
+                final int m = Math.min((k + 1) * 100, vall1.size());
+                thread.execute(() -> {
+                    for (int j = k * 100; j < m; ++j) {
+                        result.add(new CopyOnWriteArrayList<>(new Double[]{(double) vall1.get(j).get(0) * vall1.get(j).get(1)}));
+                    }
+                    cde.countDown();
+                });
+            }/*
             for (var i : vall1) {
                 thread.execute(() -> {
+                    try{
+                        Thread.sleep(10);
+                    }
+                    catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     result.add(new CopyOnWriteArrayList<>(new Double[] {(double) i.get(0) * i.get(1)}));
                     cde.countDown();
                 });
-            }
-            try{
+            }*/
+            try {
                 cde.await();
-            }catch(java.lang.InterruptedException e){}
+            } catch (java.lang.InterruptedException e) {
+            }
             thread.shutdown();
         } else if (method.equals(Map.exponentiate)) {
             ThreadPool thread = new ThreadPool(4);
             CountDownLatch cde = new CountDownLatch(vall1.size());
             for (var i : vall1) {
                 thread.execute(() -> {
-                    result.add(new CopyOnWriteArrayList<>(new Double[] {Math.pow(i.get(0), i.get(1))}));
+                    result.add(new CopyOnWriteArrayList<>(new Double[]{Math.pow(i.get(0), i.get(1))}));
                     cde.countDown();
                 });
             }
-            try{
+            try {
                 cde.await();
-            }catch(java.lang.InterruptedException e){}
+            } catch (java.lang.InterruptedException e) {
+            }
             thread.shutdown();
         } else if (method.equals(Reduce.max)) {
             for (var val : vall1) {
@@ -218,12 +248,12 @@ public class TaskNode<T, T1> extends Node<T1> {
                         counter = 1;
                     }
                 }
-                result.add(new CopyOnWriteArrayList<>(new Double[] {max}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{max}));
             }
 
         } else if (method.equals(Reduce.length)) {
             for (var val : vall1) {
-                result.add(new CopyOnWriteArrayList<>(new Double[] {(double)val.size()}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{(double) val.size()}));
             }
         } else if (method.equals(Reduce.min)) {
             for (var val : vall1) {
@@ -235,7 +265,7 @@ public class TaskNode<T, T1> extends Node<T1> {
                         counter = 1;
                     }
                 }
-                result.add(new CopyOnWriteArrayList<>(new Double[] {min}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{min}));
             }
         } else if (method.equals(Reduce.overage)) {
             for (var val : vall1) {
@@ -243,7 +273,7 @@ public class TaskNode<T, T1> extends Node<T1> {
                 for (var i : val) {
                     aver += i;
                 }
-                result.add(new CopyOnWriteArrayList<>(new Double[] {aver/val.size()}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{aver / val.size()}));
             }
         } else if (method.equals(Reduce.sum)) {
             for (var val : vall1) {
@@ -251,7 +281,7 @@ public class TaskNode<T, T1> extends Node<T1> {
                 for (var i : val) {
                     sum += i;
                 }
-                result.add(new CopyOnWriteArrayList<>(new Double[] {sum}));
+                result.add(new CopyOnWriteArrayList<>(new Double[]{sum}));
             }
         } else if (method.equals(Zip.concat)) {
             int len = Math.min(vall1.size(), vall2.size());

@@ -7,10 +7,7 @@ import dev.gusevang.tree.Reduce;
 import dev.gusevang.tree.Tree;
 import org.openjdk.jmh.annotations.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -19,9 +16,12 @@ public class Benchmarking {
 
     @State(Scope.Benchmark)
     public static class MyBenchmarkState1 {
-        //@Param({"5", "10", "20", "50", "100", "500"})
-        @Param({"1000", "1500"})
+        //@Param({ "100", "500", "1000", "1500"})
+        @Param({"10000"})
         public int value;
+
+        @Param({"4"})
+        public int threadsVal;
 
         Random rnd = new Random();
         private Tree<Double> tree;
@@ -29,31 +29,35 @@ public class Benchmarking {
         @Setup(Level.Invocation)
         public void setUp() {
             CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> list1 = new CopyOnWriteArrayList<>();
-            for (var i = 0; i < 10; i++) {
-                list1.add(new CopyOnWriteArrayList<>(new Double[] {Math.random() * 100}));
+            for (var i = 0; i < value; i++) {
+                list1.add(new CopyOnWriteArrayList<>(new Double[] {Math.random() * 100, Math.random() * 100}));
             }
             CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> list2 = new CopyOnWriteArrayList<>();
             list2.add(new CopyOnWriteArrayList<>(new Double[] {5.}));
 
-            tree = Computation.reduce(Reduce.sum,
+            /*tree = Computation.reduce(Reduce.sum,
                     Computation.map(Map.multiply,
                             Computation.product(Product.product, list2,
                                     Computation.map(Map.multiply,
                                             Computation.product(Product.product,
-                                                    list1, list2)))));
+                                                    list1, list2),threadsVal)),threadsVal));*/
+            tree = Computation.map(Map.multiply,list1,threadsVal);
         }
 
     }
 
     @Benchmark
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    @Fork(value = 1, warmups = 1)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @BenchmarkMode(Mode.AverageTime)
-    public void benchmarkSimple(MyBenchmarkState1 state) {
-        state.tree.calculatingResult();
+    @Warmup(iterations = 2,time = 3)
+    @Measurement(iterations = 1,time = 5)
+    public CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> benchmarkSimple(MyBenchmarkState1 state) {
+        //return state.tree.calculatingResultThreaded();
+        return state.tree.calculatingResult();
     }
 
     /*
-
      @State(Scope.Benchmark)
     public static class MyBenchmarkState2 {
         @Param({"1", "10", "100", "1000", "10000"})

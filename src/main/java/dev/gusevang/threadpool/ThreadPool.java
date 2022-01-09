@@ -6,7 +6,7 @@ import java.util.concurrent.Executor;
 
 public class ThreadPool implements Executor {
 
-   private final Queue<Runnable> workQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Runnable> workQueue = new ConcurrentLinkedQueue<>();
     private volatile boolean isRunning = true;
 
     public ThreadPool(int nThreads) {
@@ -34,6 +34,10 @@ public class ThreadPool implements Executor {
                 if (nextTask != null) {
                     nextTask.run();
                 }
+                Thread.onSpinWait();
+                /*try{
+                    Thread.sleep(1);
+                }catch (java.lang.InterruptedException e){}*/
             }
         }
     }

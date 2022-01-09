@@ -69,7 +69,7 @@ public class Main {
         for(var i : res){
             System.out.println(i);
         }
-        Tree newTree1 = Computation.map(Map.multiply,arr);
+        Tree newTree1 = Computation.map(Map.multiply,arr,4);
         res = newTree1.calculatingResult();
         System.out.println(res);
         Tree newTree2 = Computation.zip(Zip.concat,arr1,arr1);
@@ -77,13 +77,14 @@ public class Main {
         System.out.println(res);
 
         Tree newTree3 = Computation.product(Product.product,arr1,arr1);
-        res = newTree3.calculatingResult();
+        res = newTree3.calculatingResultThreaded();
         System.out.println(res);
 
         CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> list1 = new CopyOnWriteArrayList<>();
         for (var i = 0; i < 10; i++) {
             list1.add(new CopyOnWriteArrayList<>(new Double[] {Math.random() * 100}));
         }
+
         CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> list2 = new CopyOnWriteArrayList<>();
         list2.add(new CopyOnWriteArrayList<>(new Double[] {2.}));
         Tree tree = Computation.reduce(Reduce.sum,
@@ -91,7 +92,8 @@ public class Main {
                         Computation.product(Product.product, list2,
                                 Computation.map(Map.multiply,
                                         Computation.product(Product.product,
-                                                list1, list2)))));
+                                                list1, list2),4)),4));
+
         System.out.println(tree.calculatingResultThreaded());
         System.out.println(tree.calculatingResult());
         //Computation.Map t = new Computation.Map(Map.add, arr);
