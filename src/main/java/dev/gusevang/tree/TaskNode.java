@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 public class TaskNode<T, T1> extends Node<T1> {
     private T method;    //divide, add, ... etc.
-    private int t;
 
     public TaskNode(T typeOfMethod, Node<T1> nodeleft, Node<T1> noderight) { //for zip/(reduce) operations
         method = typeOfMethod;
@@ -23,10 +22,9 @@ public class TaskNode<T, T1> extends Node<T1> {
         left = nodeleft;
     }
 
-    public TaskNode(T typeOfMethod, Node<T1> node, int threads) { //for map operations
+    public TaskNode(T typeOfMethod, Node<T1> node) { //for map operations
         method = typeOfMethod;
         right = left = node;
-        t = threads;
     }
 
     @Override
@@ -39,13 +37,7 @@ public class TaskNode<T, T1> extends Node<T1> {
         }
         int y = Math.min(val1.size(), val2.size());
         CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> result = new CopyOnWriteArrayList<>();
-        //клиент-сервис система
-
-        /*List<List<Double>> matrix = val1.stream()
-                .map(line -> line.stream().map(x -> x.doubleValue()).collect(Collectors.toList()))
-                .collect(Collectors.toList());*/
         CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> vall1 = (CopyOnWriteArrayList<CopyOnWriteArrayList<Double>>) (Object) val1;
-        //System.out.println(vall1);
         CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> vall2 = (CopyOnWriteArrayList<CopyOnWriteArrayList<Double>>) (Object) val2;
         y = 0;
         if (method.equals(Map.divide)) {
@@ -156,21 +148,19 @@ public class TaskNode<T, T1> extends Node<T1> {
         }
         int y = Math.min(val1.size(), val2.size());
         CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> result = new CopyOnWriteArrayList<>();
-        //клиент-сервис система
-
-        /*List<List<Double>> matrix = val1.stream()
-                .map(line -> line.stream().map(x -> x.doubleValue()).collect(Collectors.toList()))
-                .collect(Collectors.toList());*/
         CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> vall1 = (CopyOnWriteArrayList<CopyOnWriteArrayList<Double>>) (Object) val1;
-        //System.out.println(vall1);
         CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> vall2 = (CopyOnWriteArrayList<CopyOnWriteArrayList<Double>>) (Object) val2;
         y = 0;
         if (method.equals(Map.divide)) {
             ThreadPool thread = new ThreadPool(4);
             CountDownLatch cde = new CountDownLatch(vall1.size());
-            for (var i : vall1) {
+            for (int i = 0; i < vall1.size(); i += 100) {
+                final int k = i;
+                final int m = Math.min((k + 1) * 100, vall1.size());
                 thread.execute(() -> {
-                    result.add(new CopyOnWriteArrayList<>(new Double[]{(double) i.get(0) / i.get(1)}));
+                    for (int j = k * 100; j < m; ++j) {
+                        result.add(new CopyOnWriteArrayList<>(new Double[]{(double) vall1.get(j).get(0) / vall1.get(j).get(1)}));
+                    }
                     cde.countDown();
                 });
             }
@@ -182,9 +172,13 @@ public class TaskNode<T, T1> extends Node<T1> {
         } else if (method.equals(Map.add)) {
             ThreadPool thread = new ThreadPool(4);
             CountDownLatch cde = new CountDownLatch(vall1.size());
-            for (var i : vall1) {
+            for (int i = 0; i < vall1.size(); i += 100) {
+                final int k = i;
+                final int m = Math.min((k + 1) * 100, vall1.size());
                 thread.execute(() -> {
-                    result.add(new CopyOnWriteArrayList<>(new Double[]{(double) i.get(0) + i.get(1)}));
+                    for (int j = k * 100; j < m; ++j) {
+                        result.add(new CopyOnWriteArrayList<>(new Double[]{(double) vall1.get(j).get(0) + vall1.get(j).get(1)}));
+                    }
                     cde.countDown();
                 });
             }
@@ -194,8 +188,7 @@ public class TaskNode<T, T1> extends Node<T1> {
             }
             thread.shutdown();
         } else if (method.equals(Map.multiply)) {
-            ThreadPool thread = new ThreadPool(t);
-            //var thread = Executors.newCachedThreadPool();
+            ThreadPool thread = new ThreadPool(4);
             CountDownLatch cde = new CountDownLatch(vall1.size() % 100 == 0 ? vall1.size() / 100 : vall1.size() / 100 + 1);
             for (int i = 0; i < vall1.size(); i += 100) {
                 final int k = i;
@@ -206,19 +199,7 @@ public class TaskNode<T, T1> extends Node<T1> {
                     }
                     cde.countDown();
                 });
-            }/*
-            for (var i : vall1) {
-                thread.execute(() -> {
-                    try{
-                        Thread.sleep(10);
-                    }
-                    catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    result.add(new CopyOnWriteArrayList<>(new Double[] {(double) i.get(0) * i.get(1)}));
-                    cde.countDown();
-                });
-            }*/
+            }
             try {
                 cde.await();
             } catch (java.lang.InterruptedException e) {
@@ -227,9 +208,13 @@ public class TaskNode<T, T1> extends Node<T1> {
         } else if (method.equals(Map.exponentiate)) {
             ThreadPool thread = new ThreadPool(4);
             CountDownLatch cde = new CountDownLatch(vall1.size());
-            for (var i : vall1) {
+            for (int i = 0; i < vall1.size(); i += 100) {
+                final int k = i;
+                final int m = Math.min((k + 1) * 100, vall1.size());
                 thread.execute(() -> {
-                    result.add(new CopyOnWriteArrayList<>(new Double[]{Math.pow(i.get(0), i.get(1))}));
+                    for (int j = k * 100; j < m; ++j) {
+                        result.add(new CopyOnWriteArrayList<>(new Double[]{Math.pow(vall1.get(j).get(0) , vall1.get(j).get(1))}));
+                    }
                     cde.countDown();
                 });
             }

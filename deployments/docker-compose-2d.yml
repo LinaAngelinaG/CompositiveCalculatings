@@ -1,0 +1,13 @@
+version: "3.7"
+
+services:
+  clusterer_2d:
+    user: "root"
+    build:
+      context: ..
+      dockerfile: deployments/Dockerfile
+    environment:
+      CL_KAFKA_BOOTSTRAP_SERVERS: 192.168.0.104:29092
+      CL_KAFKA_RQ_TOPIC: cl.worker.rq_2d
+      REDIS_HOST: 192.168.0.104
+      REDIS_PORT: 6379

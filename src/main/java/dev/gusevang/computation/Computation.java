@@ -7,14 +7,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Computation<T> {
 
-    public static<T> Tree<T> map(Map type, Tree<T> tree, int threads){
-        TaskNode<Map,T> task = new TaskNode(type, tree.getHead(), threads);
+    public static<T> Tree<T> map(Map type, Tree<T> tree){
+        TaskNode<Map,T> task = new TaskNode(type, tree.getHead());
         tree.toHead(task);
         return tree;
     };
 
-    public static<T> Tree<T> map(Map type, CopyOnWriteArrayList<CopyOnWriteArrayList<T>> data, int threads){
-        TaskNode<Map,T> task = new TaskNode(type, new DataNode(data),threads);
+    public static<T> Tree<T> map(Map type, CopyOnWriteArrayList<CopyOnWriteArrayList<T>> data){
+        TaskNode<Map,T> task = new TaskNode(type, new DataNode(data));
         Tree<T> tree = new Tree<>(task);
         return tree;
     };
@@ -44,13 +44,13 @@ public class Computation<T> {
     };
 
     public static<T> Tree<T> reduce(Reduce type, CopyOnWriteArrayList<CopyOnWriteArrayList<T>> data){
-        TaskNode<Reduce,T> task = new TaskNode(type, new DataNode(data),1);
+        TaskNode<Reduce,T> task = new TaskNode(type, new DataNode(data));
         Tree<T> tree = new Tree<>(task);
         return tree;
     };
 
     public static<T> Tree<T> reduce(Reduce type, Tree<T> tree){
-        TaskNode<Reduce,T> task = new TaskNode(type, tree.getHead(),1);
+        TaskNode<Reduce,T> task = new TaskNode(type, tree.getHead());
         tree.toHead(task);
         return tree;
     };

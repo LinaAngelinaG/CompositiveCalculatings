@@ -69,7 +69,7 @@ public class Main {
         for(var i : res){
             System.out.println(i);
         }
-        Tree newTree1 = Computation.map(Map.multiply,arr,4);
+        Tree newTree1 = Computation.map(Map.multiply,arr);
         res = newTree1.calculatingResult();
         System.out.println(res);
         Tree newTree2 = Computation.zip(Zip.concat,arr1,arr1);
@@ -92,7 +92,7 @@ public class Main {
                         Computation.product(Product.product, list2,
                                 Computation.map(Map.multiply,
                                         Computation.product(Product.product,
-                                                list1, list2),4)),4));
+                                                list1, list2)))));
 
         System.out.println(tree.calculatingResultThreaded());
         System.out.println(tree.calculatingResult());

@@ -16,12 +16,12 @@ public class Benchmarking {
 
     @State(Scope.Benchmark)
     public static class MyBenchmarkState1 {
-        //@Param({ "100", "500", "1000", "1500"})
-        @Param({"10000"})
+        @Param({ "100", "500", "1000", "1500", "10000","100000"})
+        //@Param({"10000"})
         public int value;
 
-        @Param({"4"})
-        public int threadsVal;
+        //@Param({"4"})
+        //public int threadsVal;
 
         Random rnd = new Random();
         private Tree<Double> tree;
@@ -35,13 +35,13 @@ public class Benchmarking {
             CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> list2 = new CopyOnWriteArrayList<>();
             list2.add(new CopyOnWriteArrayList<>(new Double[] {5.}));
 
-            /*tree = Computation.reduce(Reduce.sum,
+            tree = Computation.reduce(Reduce.sum,
                     Computation.map(Map.multiply,
                             Computation.product(Product.product, list2,
                                     Computation.map(Map.multiply,
                                             Computation.product(Product.product,
-                                                    list1, list2),threadsVal)),threadsVal));*/
-            tree = Computation.map(Map.multiply,list1,threadsVal);
+                                                    list1, list2)))));
+            //tree = Computation.map(Map.multiply,list1);
         }
 
     }
@@ -55,6 +55,16 @@ public class Benchmarking {
     public CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> benchmarkSimple(MyBenchmarkState1 state) {
         //return state.tree.calculatingResultThreaded();
         return state.tree.calculatingResult();
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(iterations = 2,time = 3)
+    @Measurement(iterations = 1,time = 5)
+    public CopyOnWriteArrayList<CopyOnWriteArrayList<Double>> benchmarkThreaded(MyBenchmarkState1 state) {
+        return state.tree.calculatingResultThreaded();
     }
 
     /*
